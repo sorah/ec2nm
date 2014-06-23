@@ -13,22 +13,35 @@ import (
 )
 
 type Handl struct {
+	Domain string;
 	Instances map[string]ec2.Instance;
 }
 
 func (hn *Handl) ServeDNS(writer dns.ResponseWriter, req *dns.Msg) {
-	fmt.Println(strings.Split(req.Question[0].Name, ".")[0])
-
 	response := new(dns.Msg)
 	response.SetReply(req)
-	response.Authoritative = true
 
-	instance, ok := hn.Instances[strings.Split(req.Question[0].Name, ".")[0]]
+	domainIndex := strings.LastIndex(req.Question[0].Name, hn.Domain)
+	if domainIndex < 0 {
+		fmt.Println("Not target domain")
+		writer.WriteMsg(response)
+
+		return
+	}
+
+	queryName := req.Question[0].Name[0:(domainIndex-1)]
+	paths := strings.Split(queryName, ".")
+
+	instanceName := paths[len(paths)-1]
+
+	instance, ok := hn.Instances[instanceName]
 	if ! ok { // empty
 		fmt.Println("Not found")
 		writer.WriteMsg(response)
 		return
 	}
+
+	response.Authoritative = true
 
 	rr := new(dns.A)
 	rr.Hdr = dns.RR_Header{Name: req.Question[0].Name, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 0}
@@ -49,6 +62,7 @@ func main() {
 	fmt.Println("Hello!")
 
 	regionName := flag.String("region", os.Getenv("AWS_REGION"), "AWS Region name")
+	domain := flag.String("domain", "aws", "Suffix for instance records")
 
 	flag.Parse()
 
@@ -69,6 +83,7 @@ func main() {
 	}
 
 	handler := new(Handl)
+	handler.Domain = *domain
 	handler.Instances = make(map[string]ec2.Instance, 10)
 
 	for _, reservation := range instances.Reservations {
