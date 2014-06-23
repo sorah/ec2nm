@@ -1,0 +1,3 @@
+# set: ft=ruby
+#package 'github.com/sorah/ec2ns'
+gom 'github.com/miekg/dns'
