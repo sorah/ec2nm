@@ -44,7 +44,7 @@ func (hn *Handl) ServeDNS(writer dns.ResponseWriter, req *dns.Msg) {
 }
 
 func main() {
-	fmt.Println("Hello")
+	fmt.Println("Hello!")
 
 	var regionName string
 	if regionName = os.Getenv("AWS_REGION"); regionName == "" {
@@ -86,5 +86,6 @@ func main() {
 		Net:  "udp",
 	}
 
+	fmt.Println("Start...")
 	server.ListenAndServe()
 }
