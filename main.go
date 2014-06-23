@@ -15,6 +15,7 @@ import (
 type Handl struct {
 	Domain string;
 	Instances map[string]ec2.Instance;
+	TimeToAlive uint;
 }
 
 func (hn *Handl) ServeDNS(writer dns.ResponseWriter, req *dns.Msg) {
@@ -44,7 +45,7 @@ func (hn *Handl) ServeDNS(writer dns.ResponseWriter, req *dns.Msg) {
 	response.Authoritative = true
 
 	rr := new(dns.A)
-	rr.Hdr = dns.RR_Header{Name: req.Question[0].Name, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 0}
+	rr.Hdr = dns.RR_Header{Name: req.Question[0].Name, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: uint32(hn.TimeToAlive)}
 	rr.A = net.ParseIP(instance.PrivateIpAddress)
 
 	switch req.Question[0].Qtype {
@@ -63,6 +64,7 @@ func main() {
 
 	regionName := flag.String("region", os.Getenv("AWS_REGION"), "AWS Region name")
 	domain := flag.String("domain", "aws", "Suffix for instance records")
+	ttl := flag.Uint("ttl", 300, "TTL for DNS records")
 
 	flag.Parse()
 
@@ -84,6 +86,7 @@ func main() {
 
 	handler := new(Handl)
 	handler.Domain = *domain
+	handler.TimeToAlive = *ttl
 	handler.Instances = make(map[string]ec2.Instance, 10)
 
 	for _, reservation := range instances.Reservations {
