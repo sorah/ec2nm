@@ -12,13 +12,13 @@ import (
 	"github.com/mitchellh/goamz/ec2"
 )
 
-type Handl struct {
+type Handler struct {
 	Domain string;
 	Instances map[string]ec2.Instance;
 	TimeToAlive uint;
 }
 
-func (hn *Handl) ServeDNS(writer dns.ResponseWriter, req *dns.Msg) {
+func (hn *Handler) ServeDNS(writer dns.ResponseWriter, req *dns.Msg) {
 	response := new(dns.Msg)
 	response.SetReply(req)
 
@@ -84,7 +84,7 @@ func main() {
 		panic(err)
 	}
 
-	handler := new(Handl)
+	handler := new(Handler)
 	handler.Domain = *domain
 	handler.TimeToAlive = *ttl
 	handler.Instances = make(map[string]ec2.Instance, 10)
