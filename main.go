@@ -5,6 +5,8 @@ import (
 	"net"
 	"fmt"
 	"strings"
+	"flag"
+
 	"github.com/miekg/dns"
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/ec2"
@@ -46,11 +48,14 @@ func (hn *Handl) ServeDNS(writer dns.ResponseWriter, req *dns.Msg) {
 func main() {
 	fmt.Println("Hello!")
 
-	var regionName string
-	if regionName = os.Getenv("AWS_REGION"); regionName == "" {
-	  regionName = "ap-northeast-1"
+	regionName := flag.String("region", os.Getenv("AWS_REGION"), "AWS Region name")
+
+	flag.Parse()
+
+	if *regionName == "" {
+		panic("Region should be specified via -region option or $AWS_REGION")
 	}
-	region := aws.Regions[regionName]
+	region := aws.Regions[*regionName]
 
 	auth, err := aws.EnvAuth()
 	if err != nil {
