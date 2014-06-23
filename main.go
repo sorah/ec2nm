@@ -59,6 +59,28 @@ func (hn *Handler) ServeDNS(writer dns.ResponseWriter, req *dns.Msg) {
 	writer.WriteMsg(response)
 }
 
+func UpdateInstances(client *ec2.EC2, handler *Handler) {
+	instances, err := client.Instances(nil, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	newInstances := make(map[string]ec2.Instance, 10)
+
+	for _, reservation := range instances.Reservations {
+		for _, instance := range reservation.Instances {
+			for _, tag := range instance.Tags {
+				if tag.Key == "Name" {
+					fmt.Printf("%v: %v\n", tag.Value, net.ParseIP(instance.PrivateIpAddress))
+					newInstances[tag.Value] = instance
+				}
+			}
+		}
+	}
+
+	handler.Instances = newInstances
+}
+
 func main() {
 	fmt.Println("Hello!")
 
@@ -79,26 +101,12 @@ func main() {
 	}
 
 	client := ec2.New(auth, region)
-	instances, err := client.Instances(nil, nil)
-	if err != nil {
-		panic(err)
-	}
 
 	handler := new(Handler)
 	handler.Domain = *domain
 	handler.TimeToAlive = *ttl
-	handler.Instances = make(map[string]ec2.Instance, 10)
 
-	for _, reservation := range instances.Reservations {
-		for _, instance := range reservation.Instances {
-			for _, tag := range instance.Tags {
-				if tag.Key == "Name" {
-					fmt.Printf("%v: %v\n", tag.Value, net.ParseIP(instance.PrivateIpAddress))
-					handler.Instances[tag.Value] = instance
-				}
-			}
-		}
-	}
+	UpdateInstances(client, handler)
 
 	mux := dns.NewServeMux()
 	mux.Handle(".", handler)
