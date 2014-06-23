@@ -11,7 +11,7 @@ import (
 )
 
 type Handl struct {
-	Instances map[string]net.IP;
+	Instances map[string]ec2.Instance;
 }
 
 func (hn *Handl) ServeDNS(writer dns.ResponseWriter, req *dns.Msg) {
@@ -21,15 +21,16 @@ func (hn *Handl) ServeDNS(writer dns.ResponseWriter, req *dns.Msg) {
 	response.SetReply(req)
 	response.Authoritative = true
 
-	instance := hn.Instances[strings.Split(req.Question[0].Name, ".")[0]]
-	if instance == nil {
+	instance, ok := hn.Instances[strings.Split(req.Question[0].Name, ".")[0]]
+	if ! ok { // empty
+		fmt.Println("Not found")
 		writer.WriteMsg(response)
 		return
 	}
 
 	rr := new(dns.A)
 	rr.Hdr = dns.RR_Header{Name: req.Question[0].Name, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 0}
-	rr.A = instance
+	rr.A = net.ParseIP(instance.PrivateIpAddress)
 
 	switch req.Question[0].Qtype {
 	default:
@@ -63,14 +64,14 @@ func main() {
 	}
 
 	handler := new(Handl)
-	handler.Instances = make(map[string]net.IP, 10)
+	handler.Instances = make(map[string]ec2.Instance, 10)
 
 	for _, reservation := range instances.Reservations {
 		for _, instance := range reservation.Instances {
 			for _, tag := range instance.Tags {
 				if tag.Key == "Name" {
-					fmt.Printf("%v -- %v\n", tag.Value, net.ParseIP(instance.PrivateIpAddress))
-					handler.Instances[tag.Value] = net.ParseIP(instance.PrivateIpAddress)
+					fmt.Printf("%v: %v\n", tag.Value, net.ParseIP(instance.PrivateIpAddress))
+					handler.Instances[tag.Value] = instance
 				}
 			}
 		}
