@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 	"flag"
+	"time"
 
 	"github.com/miekg/dns"
 	"github.com/mitchellh/goamz/aws"
@@ -60,6 +61,7 @@ func (hn *Handler) ServeDNS(writer dns.ResponseWriter, req *dns.Msg) {
 }
 
 func UpdateInstances(client *ec2.EC2, handler *Handler) {
+	fmt.Println("Updating instances...")
 	instances, err := client.Instances(nil, nil)
 	if err != nil {
 		panic(err)
@@ -79,6 +81,13 @@ func UpdateInstances(client *ec2.EC2, handler *Handler) {
 	}
 
 	handler.Instances = newInstances
+	fmt.Println("----")
+}
+
+func PeriodicalInstanceUpdater(interval int, client *ec2.EC2, handler *Handler) {
+	for _ = range time.Tick(time.Duration(interval) * time.Second) {
+		UpdateInstances(client, handler)
+	}
 }
 
 func main() {
@@ -86,7 +95,8 @@ func main() {
 
 	regionName := flag.String("region", os.Getenv("AWS_REGION"), "AWS Region name")
 	domain := flag.String("domain", "aws", "Suffix for instance records")
-	ttl := flag.Uint("ttl", 300, "TTL for DNS records")
+	ttl := flag.Uint("ttl", 280, "TTL for DNS records")
+	interval := flag.int("interval", 300, "Interval to update Instances data")
 
 	flag.Parse()
 
@@ -107,6 +117,7 @@ func main() {
 	handler.TimeToAlive = *ttl
 
 	UpdateInstances(client, handler)
+	go PeriodicalInstanceUpdater(interval, client, handler)
 
 	mux := dns.NewServeMux()
 	mux.Handle(".", handler)
