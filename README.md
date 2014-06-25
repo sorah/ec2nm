@@ -1,4 +1,4 @@
-# ec2nm - DNS server helps resoling your EC2 instances' IP addresses
+# ec2nm - DNS server helps resolving your EC2 instances' IP addresses
 
 ## License
 
