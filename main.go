@@ -96,7 +96,7 @@ func main() {
 	regionName := flag.String("region", os.Getenv("AWS_REGION"), "AWS Region name")
 	domain := flag.String("domain", "aws", "Suffix for instance records")
 	ttl := flag.Uint("ttl", 280, "TTL for DNS records")
-	interval := flag.int("interval", 300, "Interval to update Instances data")
+	interval := flag.Int("interval", 300, "Interval to update Instances data")
 
 	flag.Parse()
 
@@ -117,7 +117,7 @@ func main() {
 	handler.TimeToAlive = *ttl
 
 	UpdateInstances(client, handler)
-	go PeriodicalInstanceUpdater(interval, client, handler)
+	go PeriodicalInstanceUpdater(*interval, client, handler)
 
 	mux := dns.NewServeMux()
 	mux.Handle(".", handler)
