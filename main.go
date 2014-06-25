@@ -20,6 +20,19 @@ func PeriodicalInstanceUpdater(interval int, handler *ec2nm.Handler) {
 	}
 }
 
+func parseVpcAliasesOption(str string) map[string]string {
+	ary := strings.Split(str, ",")
+	aliases := make(map[string]string, len(ary))
+	for _, aliasStr := range ary {
+		alias := strings.Split(aliasStr, ":")
+		fmt.Println(aliasStr)
+		if len(alias) == 2 {
+			aliases[alias[1]] = alias[0]
+		}
+	}
+	return aliases
+}
+
 func main() {
 	fmt.Println("Hello!")
 
@@ -30,6 +43,7 @@ func main() {
 	interval := flag.Int("interval", 300, "Interval to update Instances data")
 	bind := flag.String("bind", ":10053", "bind address + port")
 	protocol := flag.String("protocol", "udp", "protocol")
+	vpcAliases := flag.String("vpc-aliases", "", "Alias for VPC id (ex: vpc-deadbeef:myvpc,vpc-...)")
 
 	flag.Parse()
 
@@ -51,6 +65,7 @@ func main() {
 		Interval: *interval,
 		Bind: *bind,
 		Protocol: *protocol,
+		VpcAliases: parseVpcAliasesOption(*vpcAliases),
 	}
 
 	handler := &ec2nm.Handler{

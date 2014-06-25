@@ -38,7 +38,7 @@ func (handler *Handler) resolveInstance(path []string) (instance ec2.Instance, o
 	}
 
 	// Name[-2].Vpc[-1]
-	instancesPerVpc, ok := handler.Vpcs[path[len(path)-1]]
+	instancesPerVpc, ok := handler.Vpcs[handler.Config.solveVpcId(path[len(path)-1])]
 	if ok {
 		instance, ok := instancesPerVpc[path[len(path)-2]]
 		if ok {
@@ -49,7 +49,7 @@ func (handler *Handler) resolveInstance(path []string) (instance ec2.Instance, o
 	// Name[-3].Vpc[-2].Region[-1]
 	vpcsPerRegion, ok := handler.VpcsInRegions[path[len(path)-1]]
 	if ok {
-		instancesPerVpcPtr, ok := vpcsPerRegion[path[len(path)-2]]
+		instancesPerVpcPtr, ok := vpcsPerRegion[handler.Config.solveVpcId(path[len(path)-2])]
 		if ok {
 			instancesPerVpc = *instancesPerVpcPtr
 			instance, ok := instancesPerVpc[path[len(path)-3]]
