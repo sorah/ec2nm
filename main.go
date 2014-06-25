@@ -97,6 +97,8 @@ func main() {
 	domain := flag.String("domain", "aws", "Suffix for instance records")
 	ttl := flag.Uint("ttl", 280, "TTL for DNS records")
 	interval := flag.Int("interval", 300, "Interval to update Instances data")
+	bind := flag.String("bind", ":10053", "bind address + port")
+	protocol := flag.String("protocol", "udp", "protocol")
 
 	flag.Parse()
 
@@ -123,9 +125,9 @@ func main() {
 	mux.Handle(".", handler)
 
 	server := &dns.Server{
-		Addr: ":10053",
+		Addr: *bind,
 		Handler: mux,
-		Net:  "udp",
+		Net: *protocol,
 	}
 
 	fmt.Println("Start...")
