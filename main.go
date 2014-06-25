@@ -11,7 +11,7 @@ import (
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/ec2"
 
-	"./ec2nm"
+	"github.com/sorah/ec2nm/ec2nm"
 )
 
 func PeriodicalInstanceUpdater(interval int, handler *ec2nm.Handler) {

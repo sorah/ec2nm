@@ -1,5 +1,69 @@
 # ec2nm - DNS server helps resolving your EC2 instances' IP addresses
 
+## Install
+
+```
+$ go get github.com/sorah/ec2nm
+```
+
+## Run
+
+```
+$ AWS_ACCESS_KEY_ID=XXX AWS_SECRET_ACCESS_KEY=XXX ec2nm -region ap-northeast-1
+```
+
+## Usage
+
+(By default, port is `10053` and domain (record suffix) is `aws`)
+
+```
+$ dig +short -p 10053 @localhost instance.aws
+10.x.x.x (private ip for Name:instance)
+
+$ dig +short -p 10053 @localhost instance.vpc-deadbeef.aws
+10.x.x.x (private ip for Name:instance in vpc-deadbeef)
+
+$ dig +short -p 10053 @localhost instance.ap-northeast-1.aws
+10.x.x.x (private ip for Name:instance, located in ap-northeast-1)
+
+$ dig +short -p 10053 @localhost instance.vpc-deadbeef.ap-northeast-1.aws
+10.x.x.x (private ip for Name:instance in vpc-deadbeef, located in ap-northeast-1)
+```
+
+## Options
+
+
+### `-region`
+
+Specify AWS region names. It can specify multiple values (separeted by comma.)
+
+```
+-region ap-northeast-1,us-west-1
+```
+
+### `-bind`
+
+Specify bind address and port. Default `:10053`.
+
+### `-interval`
+
+Interval to update instance lists in seconds. Default `300` seconds.
+
+### `-ttl`
+
+TTL for records. Default `280` seconds.
+
+### `-vpc-aliases`
+
+Set aliases for VPCs.  It can specify multiple values (separeted by comma.)
+
+```
+$ ec2nm -vpc-aliases vpc-deadbeef:my-vpc,vpc-8badf00d:another-vpc
+```
+
+By this example, `my-vpc` effects as an alias to `vpc-deadbeef`, `another-vpc` effects as an alias to `vpc-8badf00d`.
+
+
 ## License
 
 ```
