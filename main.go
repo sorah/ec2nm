@@ -53,7 +53,11 @@ func main() {
 		Protocol: *protocol,
 	}
 
-	handler := &ec2nm.Handler{Config: config, Regions: make(map[string]map[string]ec2.Instance)}
+	handler := &ec2nm.Handler{
+		Config: config,
+		Regions: make(map[string]map[string]ec2.Instance, 1),
+		VpcsInRegions: make(map[string]map[string]*map[string]ec2.Instance, 1),
+	}
 
 	handler.UpdateInstances()
 	go PeriodicalInstanceUpdater(*interval, handler)
