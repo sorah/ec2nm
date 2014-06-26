@@ -70,7 +70,6 @@ By this example, `my-vpc` effects as an alias to `vpc-deadbeef`, `another-vpc` e
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "Stmt1403759286000",
             "Effect": "Allow",
             "Action": [
                 "ec2:DescribeInstances"
