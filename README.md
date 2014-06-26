@@ -63,6 +63,25 @@ $ ec2nm -vpc-aliases vpc-deadbeef:my-vpc,vpc-8badf00d:another-vpc
 
 By this example, `my-vpc` effects as an alias to `vpc-deadbeef`, `another-vpc` effects as an alias to `vpc-8badf00d`.
 
+## IAM policy
+
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "Stmt1403759286000",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeInstances"
+            ],
+            "Resource": [
+                "*"
+            ]
+        }
+    ]
+}
+```
 
 ## License
 
