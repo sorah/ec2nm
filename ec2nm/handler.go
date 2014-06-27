@@ -68,7 +68,6 @@ func (handler *Handler) ServeDNS(writer dns.ResponseWriter, req *dns.Msg) {
 
 	domainIndex := strings.LastIndex(req.Question[0].Name, handler.Config.Domain)
 	if domainIndex < 0 {
-		fmt.Println("Not target domain")
 		writer.WriteMsg(response)
 
 		return
@@ -79,7 +78,6 @@ func (handler *Handler) ServeDNS(writer dns.ResponseWriter, req *dns.Msg) {
 
 	instance, found := handler.resolveInstance(path)
 	if ! found {
-		fmt.Println("Not found")
 		writer.WriteMsg(response)
 		return
 	}

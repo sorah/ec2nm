@@ -34,9 +34,6 @@ func parseVpcAliasesOption(str string) map[string]string {
 }
 
 func main() {
-	fmt.Println("Hello!")
-
-
 	regionName := flag.String("region", os.Getenv("AWS_REGION"), "AWS Region name")
 	domain := flag.String("domain", "aws", "Suffix for instance records")
 	ttl := flag.Uint("ttl", 280, "TTL for DNS records")
