@@ -2,6 +2,8 @@ package main
 
 import (
 	"os"
+	"os/signal"
+	"syscall"
 	"fmt"
 	"strings"
 	"flag"
@@ -16,6 +18,16 @@ import (
 
 func PeriodicalInstanceUpdater(interval int, handler *ec2nm.Handler) {
 	for _ = range time.Tick(time.Duration(interval) * time.Second) {
+		handler.UpdateInstances()
+	}
+}
+
+func SignalInstanceUpdater(handler *ec2nm.Handler) {
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGHUP)
+	for {
+		_ = <-ch
+
 		handler.UpdateInstances()
 	}
 }
@@ -73,6 +85,7 @@ func main() {
 
 	handler.UpdateInstances()
 	go PeriodicalInstanceUpdater(*interval, handler)
+	go SignalInstanceUpdater(handler)
 
 	mux := dns.NewServeMux()
 	mux.Handle(".", handler)
