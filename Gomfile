@@ -1,4 +1,4 @@
-# set: ft=ruby
+# vim: ft=ruby
 gom 'github.com/sorah/ec2nm/ec2nm'
 gom 'github.com/miekg/dns'
 gom 'github.com/mitchellh/goamz/ec2'
